@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>רותם עדיני - משחקים זוגיים</title>
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet"/>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<style>
+    /* === כללי === */
+    body {
+      margin: 0;
+      font-family: 'Varela Round', sans-serif;
+      color: #333;
+      background: linear-gradient(135deg, #f5f0fa 0%, #f0e6ff 100%);
+      text-align: center;
+      transition: all 0.5s ease;
+    }
+    
+    /* === עמוד ראשי === */
+    header {
+      background: linear-gradient(135deg, #6e3b9c 0%, #9668d7 100%);
+      padding: 30px 20px;
+      color: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .tagline {
+      font-size: 1.2rem;
+      margin: 10px 0 0;
+      opacity: 0.9;
+    }
+    
+    .section {
+      display: none;
+      padding: 20px 10px;
+      min-height: auto;
+    }
+    
+    .active {
+      display: block;
+    }
+    
+    .game-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 40px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .game-card {
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      width: 320px;
+      height: 240px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .game-card::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #6e3b9c, #9668d7);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+    }
+    
+    .game-card:hover {
+      transform: translateY(-15px);
+      box-shadow: 0 15px 35px rgba(110, 59, 156, 0.2);
+    }
+    
+    .game-card:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+    
+    .game-card h2 {
+      color: #6e3b9c;
+      font-size: 1.8rem;
+      margin-top: 0;
+    }
+    
+    .game-icon {
+      font-size: 3.5rem;
+      color: #6e3b9c;
+      margin: 15px 0;
+    }
+    
+    .game-description {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #666;
+      flex-grow: 1;
+      padding: 0 10px;
+    }
+    
+    .game-button {
+      background: linear-gradient(135deg, #6e3b9c 0%, #9668d7 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
+    
+    .game-button:hover {
+      background: linear-gradient(135deg, #5e2d8c 0%, #8658c7 100%);
+      box-shadow: 0 5px 15px rgba(110, 59, 156, 0.3);
+    }
+    
+    /* === פופאפ === */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .popup-content {
+      background-color: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 450px;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .popup-content h3 {
+      margin-top: 0;
+      color: #6e3b9c;
+      font-size: 1.8rem;
+    }
+    
+    .popup-content p {
+      font-size: 1.2rem;
+      margin: 20px 0;
+    }
+    
+    .popup-content button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #6e3b9c 0%, #9668d7 100%);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    
+    .popup-content button:hover {
+      background: linear-gradient(135deg, #5e2d8c 0%, #8658c7 100%);
+      box-shadow: 0 5px 15px rgba(110, 59, 156, 0.3);
+    }
+    
+    /* === משחק היער הקסום === */
+    body.forest-theme {
+      background: linear-gradient(135deg, #2d004d, #8e44ad, #f9d976);
+      background-size: 400% 400%;
+      animation: gradientBG 20s ease infinite;
+      color: #fff;
+    }
+    
+    /* === משחק מירוץ האהבה === */
+    body.race-theme {
+      background: linear-gradient(135deg, #ff4d4d, #cc0033, #ff9999);
+      background-size: 400% 400%;
+      animation: gradientBG 20s ease infinite;
+      color: #fff;
+    }
+    
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+    
+    .game-container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 50px 30px;
+      border-radius: 20px;
+      margin-top: 30px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .game-container::before {
+      content: "";
+      position: absolute;
+      top: -30px;
+      left: -30px;
+      width: 120%;
+      height: 120%;
+      background-image: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent),
+                        radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.1), transparent);
+      z-index: 0;
+    }
+    
+    .game-container > * {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .game-title {
+      font-size: 5rem;
+      font-weight: 900;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    
+    .forest-theme .game-title {
+      color: gold;
+    }
+    
+    .race-theme .game-title {
+      color: #ffffff;
+    }
+    
+    .game-section-title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-top: 50px;
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+    
+    .forest-theme .game-section-title {
+      color: #fffacd;
+      border-bottom: 2px solid #ff4da6;
+    }
+    
+    .race-theme .game-section-title {
+      color: #ffe6f0;
+      border-bottom: 2px solid #ff4d4d;
+    }
+    
+    .game-text {
+      font-size: 1.25rem;
+      max-width: 700px;
+      margin: 0 auto 40px;
+      line-height: 1.8;
+    }
+    
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+    
+    .feature-list li {
+      margin-bottom: 14px;
+      font-size: 1.3rem;
+    }
+    
+    .forest-theme .feature-list li::before {
+      content: "✨ ";
+      margin-left: 8px;
+      color: gold;
+    }
+    
+    .race-theme .feature-list li::before {
+      content: "❤️ ";
+      margin-left: 8px;
+    }
+    
+    .steps-list li::before {
+      content: "⬅️ ";
+      margin-left: 8px;
+    }
+    
+    .buy-button {
+      display: inline-block;
+      font-weight: bold;
+      padding: 18px 40px;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+      transition: 0.3s ease;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+    
+    .forest-theme .buy-button {
+      background-color: #ff4da6;
+      color: white;
+    }
+    
+    .race-theme .buy-button {
+      background-color: #cc0033;
+      color: white;
+    }
+    
+    .forest-theme .buy-button:hover {
+      background-color: #e8439c;
+    }
+    
+    .race-theme .buy-button:hover {
+      background-color: #990026;
+    }
+    
+    .back-button {
+      display: inline-block;
+      font-size: 1.1rem;
+      padding: 12px 26px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border: 1px solid white;
+      color: white;
+    }
+    
+    .back-button:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .big-callout {
+      font-size: 3.5rem;
+      font-weight: 900;
+      margin-top: 70px;
+      text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+    
+    .forest-theme .big-callout {
+      color: gold;
+    }
+    
+    .race-theme .big-callout {
+      color: #ffe6f0;
+    }
+    
+    /* === רספונסיביות === */
+    @media (max-width: 768px) {
+      .game-title {
+        font-size: 3rem;
+      }
+      
+      .game-grid {
+        gap: 20px;
+      }
+      
+      .game-card {
+        width: 100%;
+        max-width: 350px;
+      }
+      
+      .popup-content {
+        margin: 0 20px;
+        padding: 30px;
+      }
+      
+      .big-callout {
+        font-size: 2.5rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      
+      .game-title {
+        font-size: 2.5rem;
+      }
+      
+      .game-section-title {
+        font-size: 1.6rem;
+      }
+      
+      .feature-list li {
+        font-size: 1.1rem;
+      }
+      
+      .big-callout {
+        font-size: 2rem;
+      }
+    }
+</style>
+</head>
+<body>
+<!-- עמוד ראשי -->
+<section class="section active" id="home">
+  <header>
+    <h1>המשחקים של רותם עדיני</h1>
+    <p class="tagline">משחקים זוגיים שיעשו לכם את הערב</p>
+  </header>
+  
+  <div class="game-grid">
+    <div class="game-card" data-aos="fade-up" data-aos-delay="100" onclick="showSection('forest')">
+      <h2>היער הקסום</h2>
+      <div class="game-icon"><i class="fas fa-tree"></i></div>
+      <p class="game-description">שאלות עומק, מיניות וחיבור זוגי בערב אינטימי נעים</p>
+      <button class="game-button">לפרטים נוספים</button>
+    </div>
+    
+    <div class="game-card" data-aos="fade-up" data-aos-delay="200" onclick="showSection('race')">
+      <h2>מירוץ האהבה</h2>
+      <div class="game-icon"><i class="fas fa-heart"></i></div>
+      <p class="game-description">משחק מלא בצחוקים וחוויות! 11 תחנות תחרותיות לזוגות</p>
+      <button class="game-button">לפרטים נוספים</button>
+    </div>
+    
+    <div class="game-card" data-aos="fade-up" data-aos-delay="300" onclick="openPopup()">
+      <h2>משחק חדש בקרוב</h2>
+      <div class="game-icon"><i class="fas fa-gift"></i></div>
+      <p class="game-description">הפתעה מתבשלת בתנור... הישארו מעודכנים</p>
+      <button class="game-button">להתעדכן</button>
+    </div>
+  </div>
+</section>
+
+<!-- עמוד היער הקסום -->
+<section class="section" id="forest">
+  <div class="game-container">
+    <h1 class="game-title">היער הקסום</h1>
+    <p class="game-text">המשחק שיכניס קסם לזוגיות שלכם</p>
+    
+    <p class="game-text">הכול התחיל ביום שבו רציתם פשוט לברוח קצת מהשגרה.<br/>
+      יצאתם לטיול לילי ביער קטן, אור הירח האיר את השביל – ופתאום, הכול השתנה.</p>
+      
+    <p class="game-text">מצאתם את עצמכם בתוך עולם מסתורי וקסום, מלא דמויות מעולמות אחרים:<br/>
+      פיות, שדונים, גמדים, חדי קרן ועוד דמויות מסתוריות – כל אחת מהן מזמינה אתכם לעבור משימות, לשתף, לצחוק, ולהתקרב מחדש.</p>
+      
+    <p class="game-text">היער הקסום הוא לא עוד דייט, אלא מסע רגשי עמוק עם רגעים אינטימיים,<br/>
+      שאלות מפתיעות, ואתגרים זוגיים שילוו אתכם גם הרבה אחרי.</p>
+      
+    <p class="game-text"><strong>האם תצליחו לעבור את כל התחנות ולצאת מהיער...?</strong><br/>
+      או שאולי... תיתקעו בו לנצח?</p>
+      
+    <p class="game-text" style="font-size: 1.4rem;">
+      🌕 האם תצליחו לעמוד באתגרי הקסם הזוגיים?<br/>
+      🗝️ האם אתם באמת מכירים אחד את השנייה?<br/>
+      ✨ האם אתם מוכנים למסע שלא תשכחו?
+    </p>
+    
+    <h2 class="game-section-title">למי זה מתאים?</h2>
+    <ul class="feature-list">
+      <li>לזוגות בתחילת הדרך שרוצים להעמיק</li>
+      <li>לנשואים שרוצים רגע לעצמם</li>
+      <li>לזוגות עם ילדים שמחפשים שעה של יחד</li>
+      <li>למי שמחפש דייט זוגי רגוע וביתי</li>
+      <li>למי שלא רוצה להוציא סכומים מופרזים על דייט</li>
+      <li>למי שרוצה לחזק את החיבור מחדש</li>
+    </ul>
+    
+    <h2 class="game-section-title">איך זה עובד?</h2>
+    <p class="game-text">ברגע שתלחצו על הכפתור – תעברו לעולם אחר.<br/>
+      אין צורך בהכנות, אין צורך בהדפסות – רק אתם, ביחד, עם הלינק בטלפון.<br/>
+      בכל שלב תחכה לכם משימה שתקרב אתכם, תפתיע אתכם – ותשאיר טעם של עוד.</p>
+      
+    <h2 class="game-section-title">מה זה בכלל "היער הקסום"?</h2>
+    <p class="game-text">חוויה רגשית, מסתורית ומלאת פנטזיה.<br/>
+      משחק שיחה אינטראקטיבי עם שאלות עומק, משימות קלילות ואתגרי קסם זוגיים.<br/>
+      הוא נועד לגרום לכם להסתכל אחד לשנייה בעיניים, לצחוק, לגעת, ולגלות דברים שאולי שכחתם.</p>
+      
+    <p class="game-text" style="font-size: 1.2rem;">רוצים להתחיל עכשיו? לחצו כאן ותוך רגע תקבלו את הדייט הקסום למייל שלכם.</p>
+    
+    <button class="buy-button">לרכישה</button><br/>
+    <button class="back-button" onclick="showSection('home')">⬅ חזרה לעמוד הראשי</button>
+  </div>
+</section>
+
+<!-- עמוד מירוץ האהבה -->
+<section class="section" id="race">
+  <div class="game-container">
+    <h1 class="game-title">מירוץ האהבה</h1>
+    <p class="game-text">הדרך הכי מצחיקה להעביר ערב זוגי בלתי נשכח<br>מי ינצח, מי יפתיע, ומי יסיים עם פרס?</p>
+
+    <h2 class="game-section-title">מה מחכה לכם? 🚩</h2>
+    <p class="game-text">
+      11 תחנות של משימות קלילות ומפתיעות.<br>
+      בכל תחנה – אתגר זוגי.<br>
+      המנצח בכל משימה זוכה בנקודות.<br>
+      בסוף – סופרים, משווים, צוחקים...<br>
+      ומכתירים את המנצח במירוץ 💥<br>
+    </p>
+
+    <h2 class="game-section-title">מחפשים ערב זוגי עם טוויסט? 😍</h2>
+    <p class="game-text">
+      זה לא עוד ערב מול נטפליקס.<br>
+      זה מירוץ זוגי מלא אנרגיה, תחרות, שטויות וצחוקים – בדיוק מה שצריך לשבור את השגרה.
+    </p>
+
+    <h2 class="game-section-title">למי זה מתאים? ❤️</h2>
+    <ul class="feature-list">
+      <li>לזוגות תחרותיים שאוהבים לנצח</li>
+      <li>למי שמחפש ערב קליל, מצחיק וכיפי</li>
+      <li>לזוגות חדשים שרוצים להכיר בדרך כיפית</li>
+      <li>לזוגות ותיקים שרוצים להחזיר את הפלפל</li>
+      <li>למי שצריך סיבה אמיתית להתגלגל מצחוק</li>
+    </ul>
+
+    <h2 class="game-section-title">מה מקבלים? 📦</h2>
+    <p class="game-text">
+      קובץ משחק מוכן להפעלה<br>
+      הוראות ברורות<br>
+      מתאים למסך אחד (בלי צורך להדפיס)<br>
+      פועל בטלפון, טאבלט או מחשב<br>
+      משך: שעה–שעתיים של ערב מושלם<br>
+    </p>
+
+    <h2 class="game-section-title">איך זה עובד? 🧾</h2>
+    <ul class="feature-list steps-list">
+      <li>רוכשים</li>
+      <li>מקבלים לינק למייל</li>
+      <li>לוחצים</li>
+      <li>משחקים</li>
+      <li>מתחרים</li>
+      <li>צוחקים</li>
+      <li>מתקרבים מחדש</li>
+    </ul>
+
+    <div class="big-callout">מוכנים לצאת למירוץ?</div>
+    <p class="game-text" style="margin-top: 10px; font-size: 1.4rem; font-weight: bold;">לחצו כאן ותוך רגע המשחק אצלכם!</p>
+    
+    <button class="buy-button">לרכישה</button><br/>
+    <button class="back-button" onclick="showSection('home')">⬅ חזרה לעמוד הראשי</button>
+  </div>
+</section>
+
+<!-- פופאפ -->
+<div class="popup" id="newGamePopup">
+  <div class="popup-content">
+    <h3>משחק חדש בקרוב!</h3>
+    <p>תשארו מעודכנים, אתם לא רוצים לפספס את זה ✨</p>
+    <button onclick="closePopup()">סגור</button>
+  </div>
+</div>
+
+<script>
+  function showSection(id) {
+    // הסתרת כל החלקים
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    
+    // הצגת החלק הנבחר
+    document.getElementById(id).classList.add('active');
+    
+    // שינוי רקע בהתאם לחלק הנבחר
+    document.body.classList.remove('forest-theme', 'race-theme');
+    
+    if (id === 'forest') {
+      document.body.classList.add('forest-theme');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } 
+    else if (id === 'race') {
+      document.body.classList.add('race-theme');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+  
+  function openPopup() {
+    document.getElementById('newGamePopup').style.display = 'flex';
+  }
+  
+  function closePopup() {
+    document.getElementById('newGamePopup').style.display = 'none';
+  }
+  
+  // אנימציות בעת גלילה
+  document.addEventListener('DOMContentLoaded', function() {
+    AOS.init({
+      duration: 800,
+      once: false,
+    });
+  });
+</script>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+</body>
+</html>
